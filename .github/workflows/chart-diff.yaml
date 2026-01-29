@@ -1,0 +1,86 @@
+name: chart-diff
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  KUBEBUILDER_VERSION: v4.11.1
+  GITOPS_PROMOTER_VERSION: v0.21.0
+
+jobs:
+  chart-diff:
+    name: Chart Diff
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Set up Helm
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # pin v4.3
+        with:
+          version: v3.20.0
+
+      - name: Checkout Repository
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          path: current-repo
+
+      - name: Checkout gitops-promoter at latest release
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
+        with:
+          repository: argoproj-labs/gitops-promoter
+          ref: ${{ env.GITOPS_PROMOTER_VERSION }}
+          path: gitops-promoter
+
+      - name: Install kubebuilder
+        run: |
+          curl -L -o kubebuilder "https://github.com/kubernetes-sigs/kubebuilder/releases/download/${{ env.KUBEBUILDER_VERSION }}/kubebuilder_$(go env GOOS)_$(go env GOARCH)"
+          chmod +x kubebuilder && sudo mv kubebuilder /usr/local/bin/
+          kubebuilder version
+
+      - name: Save current Chart
+        run: |
+          mkdir -p /tmp/current-chart
+          cp -r current-repo/chart/ /tmp/current-chart/
+
+      - name: Run KubeBuilder
+        working-directory: gitops-promoter
+        run: |
+          kubebuilder edit --plugins=helm/v2-alpha --output-dir=../current-repo --manifests=./dist/install.yaml
+          ls -lah ../current-repo/*
+          ls -lah /tmp/current-chart/*
+
+      - name: Remove example blocks from generated CRDs
+        run: |
+          cat current-repo/chart/templates/crd/argocdcommitstatuses.promoter.argoproj.io.yaml
+          sed -i 's/{{- if eq \(.Environment\)/{{ `{{- if eq .Environment` }}/g; s/{{- else if eq \(.Environment\)/{{ `{{- else if eq .Environment` }}/g; s/{{- end -}}/{{ `{{- end -}}` }}/g; s/{{- range \$key, \$value := \.ArgoCDCommitStatus/{{ `{{- range $key, $value := .ArgoCDCommitStatus` }}/g' current-repo/chart/templates/crd/argocdcommitstatuses.promoter.argoproj.io.yaml
+
+
+      - name: Diff charts
+        run: |
+          echo "=== Diff between generated manifests and current Helm chart ==="
+          diff -ruN --exclude='.git' --exclude='*.orig' --exclude='extra' /tmp/current-chart/chart current-repo/chart > /tmp/chart-diff.diff || true
+
+          if [ -s /tmp/chart-diff.diff ]; then
+            echo "Differences found:"
+            cat -n /tmp/chart-diff.diff
+            exit 1
+          else
+            echo "No differences found"
+          fi
+
+      - name: Upload diff artifact
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: chart-diff
+          path: /tmp/chart-diff.diff
+          if-no-files-found: ignore

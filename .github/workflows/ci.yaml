@@ -1,0 +1,50 @@
+name: ci.yaml
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  helm-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98 # v6.0.1
+
+      - name: Set up Helm
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # pin v4.3
+        with:
+          version: v3.20.0
+
+      - name: Lint Helm chart
+        run: helm lint chart
+
+      - name: Create Kind cluster
+        uses: helm/kind-action@ef37e7f390d99f746eb8b610417061a60e82a6cc # pin v1
+
+      - name: Install Argo CD # required for CRDs for now until we handle
+        run: |
+          helm repo add argo https://argoproj.github.io/argo-helm
+          helm repo update
+          helm install argocd argo/argo-cd --namespace argocd --create-namespace --wait --timeout 5m
+
+      - name: Install Helm chart
+        run: |
+          # Initial apply to install CRDs. It's expected to fail, since we install the ControllerConfiguration CRD and a ControllerConfiguration CR in the same apply.
+          kubectl create namespace promoter-system
+          helm template promoter chart/    --namespace promoter-system | kubectl apply -f - || true
+          helm template promoter chart/    --namespace promoter-system | kubectl apply -f -
+
+      - name: Verify installation
+        run: |
+          kubectl get pods -n promoter-system
+          kubectl wait --for=condition=Ready pods --all -n promoter-system --timeout=120s
+          kubectl get all -n promoter-system
+          echo "=== All pod logs ==="
+          for pod in $(kubectl get pods -n promoter-system -o jsonpath='{.items[*].metadata.name}'); do
+            echo "--- Logs for $pod ---"
+            kubectl logs "$pod" -n promoter-system --all-containers=true || true
+          done
