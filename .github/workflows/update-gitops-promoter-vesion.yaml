@@ -13,7 +13,7 @@ env:
 jobs:
   update-version:
     name: Update GitOps Promoter to Latest Version
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Checkout Repository
