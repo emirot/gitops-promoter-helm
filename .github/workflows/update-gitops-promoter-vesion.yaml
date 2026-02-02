@@ -92,7 +92,7 @@ jobs:
 
       - name: Create Pull Request
         if: steps.check-update.outputs.update_needed == 'true'
-        uses: peter-evans/create-pull-request@c7fcb2c1d4c851a1d8d82dd61df0e0f8ef373e6f # v7.0.6
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0
         with:
           path: current-repo
           commit-message: "chore: update GitOps Promoter to ${{ steps.get-latest-release.outputs.latest_version }}"
