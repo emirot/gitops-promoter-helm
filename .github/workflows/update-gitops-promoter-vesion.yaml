@@ -1,7 +1,5 @@
 name: Update GitOps Promoter Version
 
-runs-on: self-hosted
-
 on:
   workflow_dispatch:
 
@@ -15,7 +13,7 @@ env:
 jobs:
   update-version:
     name: Update GitOps Promoter to Latest Version
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     timeout-minutes: 15
     steps:
       - name: Checkout Repository
