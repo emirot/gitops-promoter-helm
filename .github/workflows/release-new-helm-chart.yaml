@@ -28,7 +28,7 @@ jobs:
 
       - name: Get latest published chart
         id: get-current-chart-version
-        path: current-repo-doc
+        working-directory: current-repo-doc
         run: |
           CHART_VERSION=$(grep '^appVersion:' chart/Chart.yaml | tr -d '"' | awk '{print $2}')
           echo "Current chart appVersion: $CHART_VERSION"
