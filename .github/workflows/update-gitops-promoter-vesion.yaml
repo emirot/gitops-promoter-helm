@@ -82,6 +82,38 @@ jobs:
         run: |
           sed -i 's/{{- if eq \(.Environment\)/{{ `{{- if eq .Environment` }}/g; s/{{- else if eq \(.Environment\)/{{ `{{- else if eq .Environment` }}/g; s/{{- end -}}/{{ `{{- end -}}` }}/g; s/{{- range \$key, \$value := \.ArgoCDCommitStatus/{{ `{{- range $key, $value := .ArgoCDCommitStatus` }}/g' current-repo/chart/templates/crd/argocdcommitstatuses.promoter.argoproj.io.yaml
 
+
+      - name: Update Chart.yaml version
+        if: steps.check-update.outputs.update_needed == 'true'
+        run: |
+          OLD_APP=$(grep '^appVersion:' chart/Chart.yaml | tr -d '"' | awk '{print $2}')
+          echo "Old app version: $OLD_APP"
+          NEW_APP="${{ steps.get-latest-release.outputs.latest_version }}"
+          echo "New app version: $NEW_APP"
+          NEW_APP="${NEW_APP#v}"
+          echo "New app version number: $NEW_APP"
+          
+          OLD_MAJOR=$(echo "$OLD_APP" | cut -d. -f1)
+          OLD_MINOR=$(echo "$OLD_APP" | cut -d. -f2)
+          NEW_MAJOR=$(echo "$NEW_APP" | cut -d. -f1)
+          NEW_MINOR=$(echo "$NEW_APP" | cut -d. -f2)
+          
+          CURRENT_CHART_VERSION=$(grep '^version:' chart/Chart.yaml | awk '{print $2}')
+          CHART_MAJOR=$(echo "$CURRENT_CHART_VERSION" | cut -d. -f1)
+          CHART_MINOR=$(echo "$CURRENT_CHART_VERSION" | cut -d. -f2)
+          CHART_PATCH=$(echo "$CURRENT_CHART_VERSION" | cut -d. -f3)
+          
+          if [ "$NEW_MAJOR" -gt "$OLD_MAJOR" ]; then
+            NEW_CHART_VERSION="$((CHART_MAJOR + 1)).0.0"
+          elif [ "$NEW_MINOR" -gt "$OLD_MINOR" ]; then
+            NEW_CHART_VERSION="$CHART_MAJOR.$((CHART_MINOR + 1)).0"
+          else
+            NEW_CHART_VERSION="$CHART_MAJOR.$CHART_MINOR.$((CHART_PATCH + 1))"
+          fi
+
+          sed -i "s/^version: .*/version: $NEW_CHART_VERSION/" chart/Chart.yaml
+          echo "Chart version bumped to $NEW_CHART_VERSION"
+
       - name: Update appVersion in gitops_promoter_version
         if: steps.check-update.outputs.update_needed == 'true'
         run: |
