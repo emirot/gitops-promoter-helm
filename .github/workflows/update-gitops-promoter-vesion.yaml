@@ -92,6 +92,7 @@ jobs:
 
       - name: Update Chart.yaml version
         if: steps.check-update.outputs.update_needed == 'true'
+        working-directory: current-repo
         run: |
           OLD_APP=$(grep '^appVersion:' chart/Chart.yaml | tr -d '"' | awk '{print $2}')
           echo "Old app version: $OLD_APP"
