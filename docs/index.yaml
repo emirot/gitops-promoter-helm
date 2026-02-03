@@ -1,0 +1,33 @@
+apiVersion: v1
+entries:
+  gitops-promoter:
+  - annotations:
+      artifacthub.io/category: integration-delivery
+      artifacthub.io/screenshots: |
+        - title: GitOps Promoter UI
+          url: https://gitops-promoter.readthedocs.io/en/latest/assets/demo.gif
+    apiVersion: v2
+    appVersion: 0.21.0
+    created: "2026-02-03T20:16:53.922673043Z"
+    description: A Helm chart to install GitOps Promoter, a GitOps-native environment
+      promotion tool.
+    digest: 2781803b47906083f1879d7b76126d34a1a14fcb14fb3e53976f2d921642240f
+    home: https://github.com/argoproj-labs/gitops-promoter-helm
+    keywords:
+    - kubernetes
+    - environment
+    - deployment
+    - continuous-delivery
+    - cd
+    - promotions
+    - gitops
+    - progressive-delivery
+    name: gitops-promoter
+    sources:
+    - https://github.com/argoproj-labs/gitops-promoter
+    - https://github.com/argoproj-labs/gitops-promoter-helm
+    type: application
+    urls:
+    - https://argoproj-labs.github.io/gitops-promoter/gitops-promoter-0.1.0.tgz
+    version: 0.1.0
+generated: "2026-02-03T20:16:53.920969019Z"
