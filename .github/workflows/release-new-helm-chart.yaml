@@ -36,7 +36,7 @@ jobs:
 
       - name: Get latest chart version from main
         id: get-current-version
-        path: current-repo
+        working-directory: current-repo
         run: |
           CHART_VERSION=$(grep '^appVersion:' chart/Chart.yaml | tr -d '"' | awk '{print $2}')
           echo "Current chart appVersion: $CHART_VERSION"
@@ -55,7 +55,7 @@ jobs:
 
       - name: Push updated chart to gh_pages
         if: steps.check-update.outputs.update_needed == 'true'
-        path: current-repo
+        working-directory: current-repo
         run: |
           git checkout gh_pages
           git reset --hard origin/main
