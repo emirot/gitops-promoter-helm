@@ -57,7 +57,8 @@ jobs:
         if: steps.check-update.outputs.update_needed == 'true'
         working-directory: current-repo
         run: |
-          git checkout gh_pages
+          git fetch origin gh_pages
+          git switch gh_pages
           git reset --hard origin/main
           mkdir -p docs
           
