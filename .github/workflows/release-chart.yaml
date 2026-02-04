@@ -65,17 +65,17 @@ jobs:
           set -ex
           git fetch origin gh-pages
           git switch gh-pages
-          git reset --hard origin/main
+
           mkdir -p docs
-          
-          helm package chart 
+          git checkout origin/main -- chart/
+          helm package chart
           helm repo index . --url https://argoproj-labs.github.io/gitops-promoter-helm/ --merge docs/index.yaml
           echo "Packaged new chart and updated index.yaml" 
           ls
           mv gitops-promoter-*.tgz docs/
           mv index.yaml docs/
           ls docs/
-          git add docs/
+          git add -A docs/
           
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
