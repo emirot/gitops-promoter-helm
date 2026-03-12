@@ -2,7 +2,7 @@ apiVersion: v2
 name: gitops-promoter
 description: A Helm chart to install GitOps Promoter, a GitOps-native environment promotion tool.
 type: application
-version: 0.3.0
+version: 0.3.1
 appVersion: 0.23.1
 keywords:
   - kubernetes
@@ -26,93 +26,7 @@ annotations:
     - title: GitOps Promoter UI
       url: https://gitops-promoter.readthedocs.io/en/latest/assets/demo.gif
   artifacthub.io/crds: |-
-    - kind: ArgoCDCommitStatus
-      version: v1alpha1
-      name: argocdcommitstatuses
-      displayName: ArgoCDCommitStatus
-      description: ArgoCDCommitStatus is the Schema for the argocdcommitstatuses API.
-    - kind: ChangeTransferPolicy
-      version: v1alpha1
-      name: changetransferpolicies
-      displayName: ChangeTransferPolicy
-      description: ChangeTransferPolicy is the Schema for the changetransferpolicies API
-    - kind: ClusterScmProvider
-      version: v1alpha1
-      name: clusterscmproviders
-      displayName: ClusterScmProvider
-      description: ClusterScmProvider is the Schema for the clusterscmproviders API.
-    - kind: CommitStatus
-      version: v1alpha1
-      name: commitstatuses
-      displayName: CommitStatus
-      description: CommitStatus is the Schema for the commitstatuses API
-    - kind: ControllerConfiguration
-      version: v1alpha1
-      name: controllerconfigurations
-      displayName: ControllerConfiguration
-      description: ControllerConfiguration is the Schema for the controllerconfigurations API.
-    - kind: GitCommitStatus
-      version: v1alpha1
-      name: gitcommitstatuses
-      displayName: GitCommitStatus
-      description: |-
-        GitCommitStatus is the Schema for the gitcommitstatuses API.
-
-        It validates commits from PromotionStrategy environments using configurable expressions
-        and creates CommitStatus resources with the validation results.
-
-        Use the Target field to control which commit is validated:
-        - "active" (default): Validates the currently deployed commit
-        - "proposed": Validates the incoming commit
-
-        The validation result is always reported on the PROPOSED commit to enable promotion gating,
-        regardless of which commit was validated.
-
-        Workflow:
-         1. Controller reads PromotionStrategy to get ProposedHydratedSha and ActiveHydratedSha
-         2. Controller selects SHA to validate based on Target field
-         3. Controller fetches commit data (subject, body, author, trailers) for selected SHA
-         4. Controller evaluates expression against selected commit data
-         5. Controller creates/updates CommitStatus with result attached to PROPOSED SHA
-         6. PromotionStrategy checks CommitStatus on PROPOSED SHA before allowing promotion
-
-        Common use cases:
-          - "Ensure active commit is not a revert before promoting"
-    - kind: GitRepository
-      version: v1alpha1
-      name: gitrepositories
-      displayName: GitRepository
-      description: GitRepository is the Schema for the gitrepositories API
-    - kind: PromotionStrategy
-      version: v1alpha1
-      name: promotionstrategies
-      displayName: PromotionStrategy
-      description: PromotionStrategy is the Schema for the promotionstrategies API
-    - kind: PullRequest
-      version: v1alpha1
-      name: pullrequests
-      displayName: PullRequest
-      description: PullRequest is the Schema for the pullrequests API
-    - kind: RevertCommit
-      version: v1alpha1
-      name: revertcommits
-      displayName: RevertCommit
-      description: RevertCommit is the Schema for the revertcommits API
-    - kind: ScmProvider
-      version: v1alpha1
-      name: scmproviders
-      displayName: ScmProvider
-      description: ScmProvider is the Schema for the scmproviders API
-    - kind: TimedCommitStatus
-      version: v1alpha1
-      name: timedcommitstatuses
-      displayName: TimedCommitStatus
-      description: TimedCommitStatus is the Schema for the timedcommitstatuses API
-    - kind: WebRequestCommitStatus
-      version: v1alpha1
-      name: webrequestcommitstatuses
-      displayName: WebRequestCommitStatus
-      description: WebRequestCommitStatus is the Schema for the webrequestcommitstatuses API
+    []
   artifacthub.io/crdsExamples: |-
     - apiVersion: promoter.argoproj.io/v1alpha1
       kind: ArgoCDCommitStatus
