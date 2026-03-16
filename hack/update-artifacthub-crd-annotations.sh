@@ -61,7 +61,7 @@ EXAMPLES_DOCS="$TMPDIR/examples_docs.yaml"
 EXAMPLES_ARRAY="$TMPDIR/examples_array.yaml"
 
 # 1) Render CRDs with helm template and build Artifact Hub crds list as a YAML array file
-helm template release "$CHART_DIR_ABS" --set crd.enable=true 2>/dev/null | yq eval-all '
+helm template release "$CHART_DIR_ABS" 2>/dev/null | yq eval-all '
   select(.kind == "CustomResourceDefinition") |
   {
     "kind": .spec.names.kind,
