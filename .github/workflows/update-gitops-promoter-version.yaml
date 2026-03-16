@@ -155,6 +155,12 @@ jobs:
           bash hack/update-artifacthub-crd-annotations.sh \
             --gitops-promoter-repo "$GITHUB_WORKSPACE/gitops-promoter"
 
+      - name: Update GITOPS_PROMOTER_VERSION in chart-diff.yaml
+        if: steps.check-update.outputs.update_needed == 'true' && inputs.force_update == true
+        run: |
+          sed -i "s/GITOPS_PROMOTER_VERSION: .*/GITOPS_PROMOTER_VERSION: ${{ steps.get-latest-release.outputs.latest_version }}/" \
+            current-repo/.github/workflows/chart-diff.yaml
+
       - name: Create Pull Request
         if: steps.check-update.outputs.update_needed == 'true'
         uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0
