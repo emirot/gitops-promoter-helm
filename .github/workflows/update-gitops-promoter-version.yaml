@@ -8,11 +8,6 @@ on:
         required: false
         default: 'false'
         type: boolean
-      custom_version:
-        description: 'Only used if force_update is true.'
-        required: false
-        default: ''
-        type: string
 
 permissions:
   contents: write
@@ -159,13 +154,6 @@ jobs:
         run: |
           bash hack/update-artifacthub-crd-annotations.sh \
             --gitops-promoter-repo "$GITHUB_WORKSPACE/gitops-promoter"
-
-      - name: Update GITOPS_PROMOTER_VERSION in chart.yaml
-        working-directory: current-repo
-        if: steps.check-update.outputs.update_needed == 'true' && inputs.force_update == true
-        run: |
-            NEW_CHART_VERSION="${{ inputs.custom_version }}"
-            sed -i "s/^version: .*/version: $NEW_CHART_VERSION/" chart/Chart.yaml
 
       - name: Create Pull Request
         if: steps.check-update.outputs.update_needed == 'true'
